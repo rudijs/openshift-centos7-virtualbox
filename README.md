@@ -71,7 +71,9 @@ WantedBy=multi-user.target
 - After a few moments openshift will be started, check for the process with:
 - `ps aux | grep openshift`
 - Open up a browser at [https://192.168.33.10:8443](https://192.168.33.10:8443)
+
 -->
+
 - Next up we'll run some configurations and start some services we need.
 - Your current admin account doesn't have full admin privileges, lets update that.
 - `cd /opt/openshift`
