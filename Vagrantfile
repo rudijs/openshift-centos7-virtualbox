@@ -14,9 +14,6 @@ Vagrant.configure(2) do |config|
   # boxes at https://atlas.hashicorp.com/search.
   #config.vm.box = "base"
   config.vm.box = "centos/7"
-  #config.vm.box = "https://github.com/CommanderK5/packer-centos-template/releases/download/0.7.1/vagrant-centos-7.1.box"
-  #config.vm.box = "https://github.com/holms/vagrant-centos7-box/releases/download/7.1.1503.001/CentOS-7.1.1503-x86_64-netboot.box"
-
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
