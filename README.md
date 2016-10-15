@@ -39,14 +39,15 @@ The installation process is simply running commands in a local shell and also co
 - You'll see lots of logging fly by on the screen.
 - Open up a browser at [https://192.168.33.10:8443](https://192.168.33.10:8443)
 - Login with the user/password **admin** **admin**
+
 <!--
+
 - Now is a good time to setup start on boot for Openshift.
 - Exit on the command line with `clt-c`
 - Create and openshift systemd service file
 - `sudo vi openshift.service`
 - Paste this text into that file:
 
-```
 [Unit]
 Description=Origin Service
 Documentation=https://github.com/openshift/origin
@@ -64,7 +65,6 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
-```
 
 - `sudo systemctl enable openshift.service`
 - `sudo systemctl start openshift`
