@@ -39,6 +39,7 @@ The installation process is simply running commands in a local shell and also co
 - You'll see lots of logging fly by on the screen.
 - Open up a browser at [https://192.168.33.10:8443](https://192.168.33.10:8443)
 - Login with the user/password **admin** **admin**
+<!--
 - Now is a good time to setup start on boot for Openshift.
 - Exit on the command line with `clt-c`
 - Create and openshift systemd service file
@@ -70,7 +71,7 @@ WantedBy=multi-user.target
 - After a few moments openshift will be started, check for the process with:
 - `ps aux | grep openshift`
 - Open up a browser at [https://192.168.33.10:8443](https://192.168.33.10:8443)
-
+-->
 - Next up we'll run some configurations and start some services we need.
 - Your current admin account doesn't have full admin privileges, lets update that.
 - `cd /opt/openshift`
