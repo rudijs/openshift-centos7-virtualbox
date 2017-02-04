@@ -17,7 +17,7 @@ The installation process is simply running commands in a local shell and also co
 - Clone the project repository
 - `git clone https://github.com/rudijs/openshift-centos7-virtualbox.git`
 - `cd openshift-centos7-virtualbox`
-- `vagrant up`
+- `vagrant up --provision`
 - SSH into the VM
 - `vagrant ssh`
 - Check that Selinux is enabled
@@ -25,15 +25,19 @@ The installation process is simply running commands in a local shell and also co
 - If not set to **enforcing** update to `SELINUX=enforcing` and reboot
 - Install Docker. We'll use the curl bash method. You can reivew [here](https://docs.docker.com/engine/installation/linux/centos/) is you wish
 - `sudo yum update -y`
+- After the system update complete, log out and reboot into the latest kernel
+- `exit`
+- `vagrant reload --provision`
+- `vagrant ssh`
 - `curl -fsSL https://get.docker.com/ | sh`
 - `sudo systemctl enable docker.service`
 - `sudo systemctl start docker`
 - From the Openshift releases download the version of openshift you wish to run [https://github.com/openshift/origin/releases](https://github.com/openshift/origin/releases)
-- In this case we'll download v1.3.0
-- `curl -L https://github.com/openshift/origin/releases/download/v1.3.0/openshift-origin-server-v1.3.0-3ab7af3d097b57f933eccef684a714f2368804e7-linux-64bit.tar.gz -o openshift-origin-server-v1.3.0-3ab7af3d097b57f933eccef684a714f2368804e7-linux-64bit.tar.gz`
+- In this case we'll download v1.4.1
+- `curl -L https://github.com/openshift/origin/releases/download/v1.4.1/openshift-origin-server-v1.4.1-3f9807a-linux-64bit.tar.gz -o openshift-origin-server-v1.4.1-3f9807a-linux-64bit.tar.gz`
 - Extract the openshift archive into the /opt directory
-- `sudo tar -C /opt -zxvf openshift-origin-server-v1.3.0-3ab7af3d097b57f933eccef684a714f2368804e7-linux-64bit.tar.gz` 
-- `sudo ln -s /opt/openshift-origin-server-v1.3.0-3ab7af3d097b57f933eccef684a714f2368804e7-linux-64bit/ /opt/openshift`
+- `sudo tar -C /opt -zxvf openshift-origin-server-v1.4.1-3f9807a-linux-64bit.tar.gz` 
+- `sudo ln -s /opt/openshift-origin-server-v1.4.1+3f9807a-linux-64bit/ /opt/openshift`
 - Lets now start openshift from the command line and login with the web browser
 - `sudo /opt/openshift/openshift start --public-master=https://192.168.33.10:8443`
 - You'll see lots of logging fly by on the screen.
@@ -78,50 +82,50 @@ WantedBy=multi-user.target
 - Your current admin account doesn't have full admin privileges, lets update that.
 - `cd /opt/openshift`
 - login as system:admin
-- `sudo ./oc login -u system:admin -n default --config=openshift.local.config/master/admin.kubeconfig`
+- `sudo ./oc login -u system:admin -n default --config=/home/vagrant/openshift.local.config/master/admin.kubeconfig`
 - Add cluster admin privileges to user 'admin'
-- `sudo ./oadm policy add-cluster-role-to-user cluster-admin admin  --config=openshift.local.config/master/admin.kubeconfig`
+- `sudo ./oadm policy add-cluster-role-to-user cluster-admin admin --config=/home/vagrant/openshift.local.config/master/admin.kubeconfig`
 - In your web browser logged in as the user admin, you'll now see admin privileged view of system projects.
 - Next up lets start an integrated docker registry service for our project to use.
-- `sudo ./oadm registry --config=openshift.local.config/master/admin.kubeconfig --service-account=registry`
+- `sudo ./oadm registry --config=/home/vagrant/openshift.local.config/master/admin.kubeconfig --service-account=registry`
 - In your web browser, click to check the default project. You'll see the docker-registry container starting up.
 - Click on **Applications** and **Builds** to view the status of the docker-registry.
 - Before our projects can use this integrated docker registry we need to update the system docker process.
 - We need the IP of the docker-registry service, click **Applications** then **Services**
-- Copy the **Cluster IP** of the docker-registry. For me it's **172.30.201.17**
+- Copy the **Cluster IP** of the docker-registry. For me it's **172.30.184.85**
 - Edit the system docker config and restart the docker service.
 - `sudo vi /lib/systemd/system/docker.service`
 - Edit the **ExecStart** line with your docker-registry IP
-- `ExecStart=/usr/bin/dockerd --selinux-enabled --insecure-registry 172.30.201.17:5000`
+- `ExecStart=/usr/bin/dockerd --selinux-enabled --insecure-registry 172.30.184.85:5000`
 - `sudo systemctl daemon-reload`
 - `sudo systemctl restart docker`
 - Next up we'll add a router for our projects to use.
 - For the next few steps we'll switch to the root user
 - `sudo su -`
 - We'll export the admin.kubeconfig so we don't have to pass it in as we've been doing with the --config option
-- `export KUBECONFIG=/opt/openshift/openshift.local.config/master/admin.kubeconfig`
+- `export KUBECONFIG=/home/vagrant/openshift.local.config/master/admin.kubeconfig`
 - `cd /opt/openshift`
 - `./oadm policy add-scc-to-user hostnetwork -z router`
 - `./oadm router --service-account=router`
 - `./oadm policy reconcile-cluster-roles`
 - If you want or need to remove or re-add the router you can remove it with `./oc delete all -l router=router`
 - You should now be able to see the router container running in the default project along with the docker-registry container.
-- Exit from root account back to user vagrant with `ctl-c`
+- Exit from root account back to user vagrant with `ctl-d`
 - OK, now we're ready to start to build and launch our own custom projects.
 - Lets install git and clone a simple nodejs http server project.
 - `sudo yum -y install git`
 - From the command line login as the regular admin user account
-- `./oc login -u admin`
+- `sudo ./oc login -u admin`
 - Create a new project named **app**
-- `./oc new-project app`
+- `sudo ./oc new-project app`
 - Create a new app in the **app** project
-- `./oc new-app https://github.com/rudijs/os-httpd.git`
+- `sudo ./oc new-app https://github.com/rudijs/os-httpd.git`
 - Open your web browser, click into the **app** project, under **Builds** and **Applications** you'll see the app build and deploy.
 - Lets now create a public route to our new app.
 - Click **Applications** then **Services** then **os-httpd**
 - Click Routes: **Create route** then **Create**
 - Set your /etc/hosts or equivilent in Windows to have the host entry
-- `192.168.33.100 os-httpd-app.router.default.svc.cluster.local`
+- `192.168.33.10 os-httpd-app.router.default.svc.cluster.local`
 - Click or open [http://os-httpd-app.router.default.svc.cluster.local/](http://os-httpd-app.router.default.svc.cluster.local/) in your browser.
 - You should see 'Hello World'
 - All done! Congratulations :-)

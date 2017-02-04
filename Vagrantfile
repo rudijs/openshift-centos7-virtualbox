@@ -49,7 +49,7 @@ Vagrant.configure(2) do |config|
   #   vb.gui = true
   #
   #   # Customize the amount of memory on the VM:
-    vb.memory = "1024"
+    vb.memory = "2048"
     vb.name = "openshift-origin"
   end
   #
@@ -70,5 +70,14 @@ Vagrant.configure(2) do |config|
   #   sudo apt-get update
   #   sudo apt-get install -y apache2
   # SHELL
+
+  # Known Issue: centos7-with-private-network-lost-fixed-ip
+  # http://stackoverflow.com/questions/32518591/centos7-with-private-network-lost-fixed-ip
+  # Should be fixed with Vagrant >= 1.9.2 release
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo nmcli connection reload
+    sudo systemctl restart network.service
+  SHELL
+
   config.vm.hostname = "openshift-origin.local"
 end
